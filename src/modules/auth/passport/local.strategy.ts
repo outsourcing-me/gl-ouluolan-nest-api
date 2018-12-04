@@ -1,19 +1,23 @@
 import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
-import { Model } from 'mongoose';
+// import { Model } from 'mongoose';
 import { use } from 'passport';
 import { Strategy } from 'passport-local';
 
-import { IUser } from '../../user/interfaces/user.interface';
+// import { IUser } from '../../user/interfaces/user.interface';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../../user/entities/user.entity';
 import {
   generateHashedPassword,
   generateSalt,
 } from '../../../utilities/encryption';
-import { MESSAGES, USER_MODEL_TOKEN } from '../../../constants';
+import { MESSAGES } from '../../../constants';
 
 @Injectable()
 export class LocalStrategy {
   constructor(
-    @Inject(USER_MODEL_TOKEN) private readonly userModel: Model<IUser>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {
     this.init();
   }
@@ -23,12 +27,12 @@ export class LocalStrategy {
       'local-signup',
       new Strategy(
         {
-          usernameField: 'email',
+          usernameField: 'name',
           passwordField: 'password',
         },
-        async (email: string, password: string, done: Function) => {
+        async (name: string, password: string, done: Function) => {
           try {
-            if (await this.userModel.findOne({ 'local.email': email })) {
+            if (await this.userRepository.findOne({ name: name })) {
               return done(
                 new UnauthorizedException(MESSAGES.UNAUTHORIZED_EMAIL_IN_USE),
                 false,
@@ -36,17 +40,14 @@ export class LocalStrategy {
             }
 
             const salt: string = generateSalt();
-            const user: IUser = new this.userModel({
-              method: 'local',
-              roles: ['user'],
-              local: {
-                email,
-                salt,
-                hashedPassword: generateHashedPassword(salt, password),
-              },
-            });
+            const user: User = new User();
+            user.name = name;
+            user.salt = salt;
+            user.status = 0;
+            user.password = generateHashedPassword(salt, password);
+            await this.userRepository.save(user);
 
-            await user.save();
+            // await user.save();
 
             done(null, user);
           } catch (error) {
@@ -60,13 +61,13 @@ export class LocalStrategy {
       'local-signin',
       new Strategy(
         {
-          usernameField: 'email',
+          usernameField: 'name',
           passwordField: 'password',
         },
-        async (email: string, password: string, done: Function) => {
+        async (name, password: string, done: Function) => {
           try {
-            const user: IUser = await this.userModel.findOne({
-              'local.email': email,
+            const user: User = await this.userRepository.findOne({
+              name: name,
             });
 
             if (!user) {
@@ -76,10 +77,7 @@ export class LocalStrategy {
               );
             }
 
-            if (
-              generateHashedPassword(user.local.salt, password) !==
-              user.local.hashedPassword
-            ) {
+            if (generateHashedPassword(user.salt, password) !== user.password) {
               return done(
                 new UnauthorizedException(
                   MESSAGES.UNAUTHORIZED_INVALID_PASSWORD,

@@ -28,13 +28,13 @@ export class AuthModule implements NestModule {
         bodyValidatorMiddleware,
         authenticate('local-signup', { session: false }),
       )
-      .forRoutes('api/auth/local/signup');
+      .forRoutes({ path: 'api/auth/local/signup', method: RequestMethod.POST });
 
     consumer
       .apply(
         bodyValidatorMiddleware,
         authenticate('local-signin', { session: false }),
       )
-      .forRoutes('api/auth/local/signin');
+      .forRoutes({ path: 'api/auth/local/signin', method: RequestMethod.POST });
   }
 }

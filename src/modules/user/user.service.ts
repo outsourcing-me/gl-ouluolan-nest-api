@@ -1,12 +1,20 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+// import { Model } from 'mongoose';
 
-import { USER_MODEL_TOKEN } from '../../constants';
-import { IUser } from './interfaces/user.interface';
+// import { USER_MODEL_TOKEN } from '../../constants';
+// import { IUser } from './interfaces/user.interface';
 
 @Injectable()
 export class UserService {
   constructor(
-    @Inject(USER_MODEL_TOKEN) private readonly userModel: Model<IUser>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
+
+  async findAll(): Promise<User[]> {
+    return await this.userRepository.find();
+  }
 }

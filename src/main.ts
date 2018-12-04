@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SERVER_CONFIG } from './constants';
 import * as helmet from 'helmet';
-import * as csurf from 'csurf';
+// import * as csurf from 'csurf';
 import * as compression from 'compression';
 import * as rateLimit from 'express-rate-limit';
 
@@ -10,7 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.disable('x-powered-by');
   app.use(helmet());
-  app.use(csurf());
+  // app.use(csurf());
   app.use(compression());
   app.use(
     rateLimit({
