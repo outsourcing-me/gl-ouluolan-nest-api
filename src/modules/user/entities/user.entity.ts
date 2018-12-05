@@ -2,8 +2,10 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  CreateDateColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
+import { Role } from './role.entity';
 
 @Entity()
 export class User {
@@ -21,4 +23,8 @@ export class User {
 
   @Column('tinyint')
   status: number;
+
+  @ManyToMany(type => Role, role => role.users)
+  @JoinTable()
+  roles: Role[];
 }

@@ -26,7 +26,7 @@ export class AuthController {
   }
 
   @Get('authorized')
-  @Roles('user')
+  @Roles('admin')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   public async authorized(): Promise<any> {
     // console.log('Authorized route...');

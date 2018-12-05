@@ -2,10 +2,6 @@ import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-// import { Model } from 'mongoose';
-
-// import { USER_MODEL_TOKEN } from '../../constants';
-// import { IUser } from './interfaces/user.interface';
 
 @Injectable()
 export class UserService {
@@ -16,5 +12,9 @@ export class UserService {
 
   async findAll(): Promise<User[]> {
     return await this.userRepository.find();
+  }
+
+  async findUserById(id: string): Promise<User> {
+    return await this.userRepository.findOne(id, { relations: ['roles'] });
   }
 }

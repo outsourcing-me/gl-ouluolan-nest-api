@@ -1,4 +1,4 @@
-import { object, string, ObjectSchema } from 'joi';
+import { object, string, ObjectSchema, array, number } from 'joi';
 
 export const authUserSchema: ObjectSchema = object({
   name: string()
@@ -8,4 +8,5 @@ export const authUserSchema: ObjectSchema = object({
     .min(6)
     .max(36)
     .required(),
+  roles: array().items(number()),
 });
